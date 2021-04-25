@@ -2,9 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include "hashmap.h"
+#include "menu.h"
+#include "pokemon.h"
 
 int main() {
-    
+    HashMap** maps;
+    maps = initializeMapsPokemon();
+    case1(maps);
     return 0;
 }
 

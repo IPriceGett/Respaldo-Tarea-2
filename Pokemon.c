@@ -25,21 +25,21 @@ typedef struct{
 
 HashMap** initializeMapsPokemon(){
     HashMap ** aux;
-    aux = (HashMap**)malloc(3*sizeof(HashMap*));
-    for(int i=0;i<3;i++){
+    aux = (HashMap**)malloc(6*sizeof(HashMap*));
+    for(int i=0;i<6;i++){
         aux[i] = createMap(191);
     }
     return aux;
 }
 
-Pokemon* CreatePokemon(int id, char* Nombre, int PC, int PS, char Sexo){
+Pokemon* CreatePokemon(char* id, char* Nombre, int PC, int PS, char Sexo){
     Pokemon* pokemon;
     pokemon = (Pokemon*) malloc(sizeof(Pokemon));
     pokemon->id = id;
     strcpy(pokemon->Nombre, Nombre);
     pokemon->PC = PC;
     pokemon->PS = PS;
-    strcpy(pokemon->Sexo, Sexo);
+    pokemon->Sexo = Sexo;
     pokemon->Estado = 1; // Estado 1 refiere a que esta activo y 0 a inactivo
     return pokemon;
 }
@@ -61,7 +61,7 @@ Pokedex* CreatePokedex(char* Nombre, char** tipos, char* EPrevia, char* EPosteri
 void DesactivarPoke(HashMap* pokedex, HashMap* map, int id){
     Pokemon* pokemon;
     Pokedex* poke;
-    pokemon = searchMap(map, id);
+    pokemon = searchMap(map, (char *)id);
     poke = searchMap(map,pokemon->Nombre);
     pokemon->Estado = 0;
     poke->Cantidad--;
@@ -144,7 +144,7 @@ void AgregarPokeTipos(HashMap* map, Pokemon* poke,Pokedex* tipos){
             insertMap(map,tipo[i], arreglo);
         }else{
             for(int j=0;j<100;j++){
-                if(arregloAux[j] == NULL){
+                if(arregloAux[j] == NULL || arregloAux[j]->Estado == 0){
                     arregloAux[j] = poke;
                     j=100;
                 }
@@ -159,8 +159,8 @@ int LastID(HashMap* map){
     Pokemon** arregloAux;
     arregloAux = searchMap(map,"Puntos");
     for(int i=0;i<100;i++){
-        if(arregloAux[i] != NULL && id<arregloAux[i]->id){
-           id = arregloAux[i]->id; 
+        if(arregloAux[i] != NULL && id<atoi(arregloAux[i]->id)){
+           id = atoi(arregloAux[i]->id); 
         }
     }
     return id++;
@@ -192,7 +192,7 @@ void LiberarPokemon(HashMap** maps, char* id){
     }
 }
 
-void LeerArchivo(HashMap** list, char* nombreArchivo){
+void LeerArchivo(HashMap** maps, char* nombreArchivo){
     FILE * archivo;
     archivo = fopen(nombreArchivo, "r");
     if(!archivo){
@@ -216,6 +216,8 @@ void LeerArchivo(HashMap** list, char* nombreArchivo){
             char* EPosterior;
             char* idPokedex;
             char* region;
+            int cantidadTipos;
+            tipos = (char**)malloc(10*sizeof(char*));
             token = strtok(line,",");
             id = token;
             token = strtok(NULL,",");
@@ -223,23 +225,49 @@ void LeerArchivo(HashMap** list, char* nombreArchivo){
             token = strtok(NULL,"\"");
             token = strtok(NULL,"\"");
             if(token!=NULL){
+                cantidadTipos = 0;
                 auxtoken = token;
-                token = nombre = strtok(NULL,",");
+                auxtoken = strtok(NULL,",");
+                for(int i=0; auxtoken!=NULL; i++){
+                    tipos[i] = auxtoken;
+                    auxtoken = strtok(NULL,",");
+                    cantidadTipos=i;
+                }
+                cantidadTipos++;
+                token =  strtok(NULL,",");
+            }else{
+                token = strtok(NULL,",");
+                tipos[0] = token;
+                cantidadTipos = 1; 
             }
             token = strtok(NULL,",");
             PC = token;
             token = strtok(NULL,",");
             PS = token;
             token = strtok(NULL,",");
-            Sexo = token;
+             printf("aweonao1\n");
+            Sexo = token[0];
+             printf("aweona2\n");
             token = strtok(NULL,",");
             EPrevia = token;
+             printf("aweona3\n");
             token = strtok(NULL,",");
             EPosterior = token;
+             printf("aweona4\n");
             token = strtok(NULL,",");
             idPokedex = token;
-            token = strtok(NULL,"\n");
+             printf("aweona5\n");
+            token = strtok(NULL,",");
             region = token;
+             printf("aweona6\n");
+            region = strtok(region,"\n");
+            Pokemon* pokemon;
+            Pokedex* pokedex;
+            printf("aweonao\n");
+            pokemon = CreatePokemon(id, nombre,atoi(PC),atoi(PS),Sexo);
+            printf("aweonao2\n");
+            pokedex = CreatePokedex(nombre,tipos,EPrevia,EPosterior,atoi(idPokedex),region,cantidadTipos);
+            InsertarPokemon(maps, pokemon, pokedex);
         }
         fclose(archivo);
         printf("----------------------------------\n");

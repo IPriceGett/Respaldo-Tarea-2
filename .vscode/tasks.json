@@ -9,6 +9,7 @@
                 "${file}",
                 "${fileDirname}\\HashMap.c",
                 "${fileDirname}\\Pokemon.c",
+                "${fileDirname}\\Menu.c",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
