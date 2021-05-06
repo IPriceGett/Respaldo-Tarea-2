@@ -5,7 +5,7 @@ typedef struct Pokemon Pokemon;
 
 typedef struct Pokedex Pokedex;
 
-Pokemon* CreatePokemon(int id, char* Nombre, int PC, int PS, char Sexo);
+Pokemon* CreatePokemon(int id, char* Nombre, int PC, int PS, char* Sexo);
 
 Pokedex* CreatePokedex(char* Nombre, char** tipos, char* EPrevia, char* EPosterior, int idPokedex, char * region, int cantidadTipos);
 

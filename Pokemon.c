@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include "HashMap.h"
 
@@ -8,7 +9,7 @@ typedef struct{
     char* Nombre;
     int PC;
     int PS; 
-    char Sexo;
+    char* Sexo;
     int Estado; // se agrega estado para eliminado logico
 }Pokemon;
 
@@ -32,14 +33,14 @@ HashMap** initializeMapsPokemon(){
     return aux;
 }
 
-Pokemon* CreatePokemon(char* id, char* Nombre, int PC, int PS, char Sexo){
+Pokemon* CreatePokemon(char* id, char* Nombre, int PC, int PS, char* Sexo){
     Pokemon* pokemon;
     pokemon = (Pokemon*) malloc(sizeof(Pokemon));
     pokemon->id = id;
-    strcpy(pokemon->Nombre, Nombre);
+    pokemon->Nombre = Nombre;
     pokemon->PC = PC;
     pokemon->PS = PS;
-    pokemon->Sexo = Sexo;
+    pokemon->Sexo=Sexo;
     pokemon->Estado = 1; // Estado 1 refiere a que esta activo y 0 a inactivo
     return pokemon;
 }
@@ -47,14 +48,14 @@ Pokemon* CreatePokemon(char* id, char* Nombre, int PC, int PS, char Sexo){
 Pokedex* CreatePokedex(char* Nombre, char** tipos, char* EPrevia, char* EPosterior, int idPokedex, char * region, int cantidadTipos){
     Pokedex* pokedex;
     pokedex = (Pokedex*)malloc(sizeof(Pokedex));
-    strcpy(pokedex->Nombre, Nombre);
+    pokedex->Nombre=Nombre;
     pokedex->Cantidad = 1;
     pokedex->tipos = tipos;
     pokedex->cantidadTipos = cantidadTipos;
-    strcpy(pokedex->EPrevia, EPrevia);
-    strcpy(pokedex->EPosterior, EPosterior);
+    pokedex->EPrevia=EPrevia;
+    pokedex->EPosterior=EPosterior;
     pokedex->idPokedex = idPokedex;
-    strcpy(pokedex->region, region);
+    pokedex->region= region;
     return pokedex;
 }
 
@@ -115,19 +116,21 @@ void AgregarPokePC(HashMap* map, Pokemon* poke){
 
 void AgregarPokeRegion(HashMap* map, Pokemon* poke,Pokedex* region){
     Pokemon** arregloAux;
-    arregloAux = searchMap(map,region->region);
-    if(!arregloAux){
+    printf("loooooooool");
+    if(!searchMap(map,region->region)){
         Pokemon** arreglo;
         arreglo = (Pokemon**) malloc(100*sizeof(Pokemon*));
         arreglo[0] = poke;
         insertMap(map,region->region, arreglo);
     }else{
+        arregloAux = searchMap(map,region->region);
         for(int j=0;j<100;j++){
             if(arregloAux[j] == NULL){
                 arregloAux[j] = poke;
                 j=100;
             }
         }
+
     }
 }
 
@@ -169,16 +172,24 @@ void AgregarPokemonid(HashMap* map, Pokemon * pokemon){
     if(pokemon->id ==NULL){
         pokemon->id = (char*)LastID(map);
     }
+    printf("%s\n",pokemon->id);
     insertMap(map,pokemon->id,pokemon);
 }
 
 void InsertarPokemon(HashMap** maps, Pokemon* pokemon, Pokedex* pokedex){
+     printf("0");
     AgregarPokemonid(maps[0],pokemon);
+     printf("1");
     AgregarPokeNombre(maps[1],pokemon);
+     printf("2");
     AgregarPokeRegion(maps[2], pokemon, pokedex);
+     printf("3");
     AgregarPokePC(maps[3],pokemon);
-    AgregarPokeTipos(maps[4], pokemon, pokedex);
+     printf("4");
     AgregarPokedexNombre(maps[5],pokedex);
+     printf("5");
+    AgregarPokeTipos(maps[4], pokemon, pokedex);
+    printf("mia5");
 }
 
 void LiberarPokemon(HashMap** maps, char* id){
@@ -205,69 +216,71 @@ void LeerArchivo(HashMap** maps, char* nombreArchivo){
         fgets(line,100,archivo);
         while(fgets(line,100,archivo)){
             char* token;
-            char* auxtoken;
+            char*token2;
+            char token3[40];
             char* nombre;
             char* id;
             char* PC;
             char* PS; 
-            char Sexo;
+            char* Sexo;
             char** tipos; 
             char* EPrevia;
             char* EPosterior;
             char* idPokedex;
             char* region;
             int cantidadTipos;
+            bool uno;
+            uno=false;
+            token2 = (char*)malloc(30*sizeof(char));
             tipos = (char**)malloc(10*sizeof(char*));
+            token = strtok(line,"\n");
             token = strtok(line,",");
             id = token;
             token = strtok(NULL,",");
             nombre = token;
             token = strtok(NULL,"\"");
-            token = strtok(NULL,"\"");
-            if(token!=NULL){
-                cantidadTipos = 0;
-                auxtoken = token;
-                auxtoken = strtok(NULL,",");
-                for(int i=0; auxtoken!=NULL; i++){
-                    tipos[i] = auxtoken;
-                    auxtoken = strtok(NULL,",");
-                    cantidadTipos=i;
-                }
-                cantidadTipos++;
-                token =  strtok(NULL,",");
-            }else{
-                token = strtok(NULL,",");
+            token2 = token;
+            printf("%d",strlen(token2));
+            if(strlen(token2)>30){
+                token = strtok(token,",");
                 tipos[0] = token;
-                cantidadTipos = 1; 
+                uno = true;
+                cantidadTipos =1;
             }
             token = strtok(NULL,",");
             PC = token;
             token = strtok(NULL,",");
             PS = token;
             token = strtok(NULL,",");
-             printf("aweonao1\n");
-            Sexo = token[0];
-             printf("aweona2\n");
+            Sexo = token;
             token = strtok(NULL,",");
             EPrevia = token;
-             printf("aweona3\n");
             token = strtok(NULL,",");
             EPosterior = token;
-             printf("aweona4\n");
             token = strtok(NULL,",");
             idPokedex = token;
-             printf("aweona5\n");
             token = strtok(NULL,",");
             region = token;
-             printf("aweona6\n");
-            region = strtok(region,"\n");
+            if(uno==false){
+                token2 = strtok(token2,",");
+                tipos[0] = token2;
+                token2 = strtok(NULL," ");
+                tipos[1] = token2;
+                cantidadTipos =2;
+            }
             Pokemon* pokemon;
             Pokedex* pokedex;
-            printf("aweonao\n");
-            pokemon = CreatePokemon(id, nombre,atoi(PC),atoi(PS),Sexo);
-            printf("aweonao2\n");
-            pokedex = CreatePokedex(nombre,tipos,EPrevia,EPosterior,atoi(idPokedex),region,cantidadTipos);
+            int i;
+            int j;
+            i =atoi(PC);
+            j=atoi(PS);
+            int numerito;
+            pokemon = CreatePokemon(id, nombre, i,j,Sexo);
+            numerito = atoi(idPokedex);
+            pokedex = CreatePokedex(nombre,tipos,EPrevia,EPosterior,numerito,region,cantidadTipos);
+            printf("aweonao3\n");
             InsertarPokemon(maps, pokemon, pokedex);
+            printf("aweonao1\n");
         }
         fclose(archivo);
         printf("----------------------------------\n");
